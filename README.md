@@ -35,10 +35,10 @@ Both architectures query a dual-indexed knowledge system:
 
 ```bash
 # Create and activate virtual environment
-python -m venv thesis_env       # python3 on Linux
-source thesis_env/bin/activate  # On Linux/macOS
+python -m venv venv       # python3 on Linux
+source venv/bin/activate  # On Linux/macOS
 # or
-thesis_env\Scripts\activate     # On Windows
+venv\Scripts\activate     # On Windows
 ```
 
 ### 2. Install dependencies
@@ -66,8 +66,8 @@ You have a couple options for setting up Neo4j:
 
 You can use Weaviate Cloud or run it locally:
 
-#### Option A: Weaviate Cloud (Recommended)
-1. Create a free account at [Weaviate Cloud](https://console.weaviate.cloud/)
+#### Option A: Weaviate Cloud 
+1. Create an account at [Weaviate Cloud](https://console.weaviate.cloud/)
 2. Create a new cluster
 3. Note your cluster URL and API key
 
@@ -171,7 +171,7 @@ The ingestion process will:
 ### 4. Run the Single Agent
 
 ```bash
-python -m agent.single_agent
+python -m agent.single_agent.single_agent
 ```
 
 **Note**: Before running, configure the client name and retrieval parameters in `agent/single_agent/single_agent.py`.

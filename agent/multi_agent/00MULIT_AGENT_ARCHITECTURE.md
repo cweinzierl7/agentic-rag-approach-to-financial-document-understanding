@@ -1,5 +1,6 @@
 # Multi-Agent Architecture Proposal
 
+
 ## Executive Summary
 
 This document proposes a multi-agent architecture for an automated Credit Risk Report system. The system retrieves Key Performance Indicators (KPIs) from indexed financial documents and produces structured credit risk reports.
@@ -8,6 +9,16 @@ Rather than implementing this as a single monolithic agent, we decompose the sys
 
 ---
 
+> **TODO: Before running the multi-agent system, set the company and retrieval parameters in the orchestrator.**
+> 
+> **Location:** `agent/multi_agent/orchestrator.py` → `main()` function (bottom of file)
+> 
+> **Parameters to configure:**
+> - `company` – Target company name (e.g., "RWE")
+> - `agent_info` – Retrieval parameters (reranker, limits, alpha, k)
+> - `year_0`, `year_1`, `year_2` – Fiscal years for quantitative KPIs
+
+---
 ## 1. Problem Statement
 
 ### What the System Does

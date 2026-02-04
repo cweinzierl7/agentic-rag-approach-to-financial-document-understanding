@@ -1,8 +1,22 @@
 # Single Agent Architecture
 
+
+
 ## Overview
 
 The single agent architecture is a unified, end-to-end agentic RAG (Retrieval-Augmented Generation) system designed to extract and compute KPIs (Key Performance Indicators) from financial documents. It combines vector search, knowledge graph retrieval, and tool-based calculations in a single orchestrated flow.
+
+
+> **TODO: Before running the single agent system, set the company and retrieval parameters in the main file.**
+> 
+> **Location:** `agent/single_agent/single_agent.py` → `main()` function (around line 1260)
+> 
+> **Parameters to configure:**
+> - `company` – Target company name 
+> - `agent_info` – Retrieval parameters (reranker, limits, alpha, k)
+> - `year_basis`, `year_0`, `year_1`, `year_2` – Fiscal years for quantitative KPIs
+
+---
 
 ## Architecture Components
 
@@ -137,8 +151,6 @@ File Output
 3. Format results with units and explanations
 
 ### Qualitative Queries
-- "What is RWE's growth strategy?"
-- "What are the main risks?"
 - "Provide a SWOT analysis"
 
 **Processing:**
@@ -179,7 +191,7 @@ AgentInfo:
 
 ```bash
 # From project root with venv activated
-python -m agent.single_agent
+python -m agent.single_agent.single_agent
 ```
 
 **Output:**

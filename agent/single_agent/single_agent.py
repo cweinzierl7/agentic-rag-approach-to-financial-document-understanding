@@ -2,7 +2,7 @@
 Single agent for agentic RAG 
 """
 
-### PLEASE SET YOUR COMPANY IN THE single_agent_run CLASS BELOW ###
+
 
 import os
 import logging
@@ -36,7 +36,23 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-
+# ============================================================================
+#   CONFIGURATION REMINDER
+# ============================================================================
+# Before running, set the following parameters in the main() function
+# (around line 1260):
+#
+#   1. company           Target company name 
+#   2. agent_info        Retrieval parameters:
+#                        - reranker_entity, reranker_fact (e.g., "RRF")
+#                        - limit_vector_results, limit_fact, limit_entity
+#                        - alpha_hybrid (semantic vs keyword weight)
+#                        - k (sentence window retrieval parameter)
+#   3. year_basis        OPTIONAL: Fiscal year basis (e.g., "FY")
+#   4. year_0/1/2        Fiscal years for quantitative KPI queries
+#
+# See main() function starting around line 1260 for details.
+# ============================================================================
 
 
 @function_tool
@@ -1286,7 +1302,8 @@ async def main():
 
 
     # PLEASE SET YOUR COMPANY HERE
-    company = "RWE"
+    company = ""
+    if company =="": logger.warning("Please set your company")
     #####
 
     client = company
@@ -1303,15 +1320,13 @@ async def main():
 
 
     kpi_qualitative_speedboat = QualitativeKPIs_speedboat(client=client)
-    query_qualitative_speedboat = kpi_qualitative_speedboat.all_queries()  # automatically builds queries
     query_qualitative_speedboat_list = kpi_qualitative_speedboat.all_queries_list()
 
     kpi_quantitative = QUANTITATIVE_KPIs_speedboat(client=client)
-    query_quantitative_speedboat = kpi_quantitative.all_queries(year_0 = 2024, )  # automatically builds queries
+    # PLEASE ADJUST YEAR BASIS AND YEARS FOR QUANTITATIVE QUERIES AS NEEDED
     query_quantitative_speedboat_list = kpi_quantitative.all_queries_list(year_basis="", year_0 = 2025, year_1=2024, year_2=2023)
 
      # combine qualitative and quantitative queries
-
     query_complete = query_qualitative_speedboat_list + query_quantitative_speedboat_list
 
     try: 

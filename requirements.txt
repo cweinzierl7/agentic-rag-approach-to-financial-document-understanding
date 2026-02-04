@@ -160,7 +160,7 @@ notebook==7.4.5
 notebook_shim==0.2.4
 numpy==2.3.3
 olefile==0.47
-openai==2.7.2
+openai>=1.108.1
 openai-agents==0.5.0
 opentelemetry-api==1.38.0
 opentelemetry-exporter-otlp-proto-common==1.38.0
@@ -173,7 +173,7 @@ opentelemetry-semantic-conventions==0.59b0
 opentelemetry-util-http==0.59b0
 orjson==3.11.3
 packaging==25.0
-pandas==2.3.3
+pandas==2.2.3
 pandocfilters==1.5.1
 parso==0.8.5
 pexpect==4.9.0
@@ -280,6 +280,5 @@ widgetsnbextension==4.0.15
 wrapt==1.17.3
 xxhash==3.6.0
 yarl==1.20.1
-zep-cloud==3.5.0
 zipp==3.23.0
 zstandard==0.25.0

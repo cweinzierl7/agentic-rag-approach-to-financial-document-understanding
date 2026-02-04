@@ -3,3 +3,5 @@ thesis_env/
 .DS_Store__pycache__/
 *.pyc
 *.pyo
+.DS_Store
+.pdf_documents/

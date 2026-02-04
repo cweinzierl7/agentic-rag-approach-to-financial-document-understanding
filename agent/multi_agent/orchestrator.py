@@ -1,4 +1,7 @@
 ''' Orchestrator for Multi-Agent  '''
+
+
+
 import os
 import logging
 import asyncio
@@ -36,6 +39,23 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
+# ============================================================================
+#  CONFIGURATION REMINDER
+# ============================================================================
+# Before running, set the following parameters in the main() function at the
+# bottom of this file:
+#
+#   1. company          Target company name (e.g., "RWE")
+#   2. agent_info       Retrieval parameters:
+#                        - reranker_entity, reranker_fact (e.g., "RRF")
+#                        - limit_vector_results, limit_fact, limit_entity
+#                        - alpha_hybrid (semantic vs keyword weight)
+#                        - k (reranking parameter)
+#   3. year_0/1/2       Fiscal years for quantitative KPI queries
+#   4. description      Run description for output file naming
+#
+# See main() function starting around line 1175 for details.
+# ============================================================================
 
 # Orchestrator via Code
 class create_credit_risk_report:
@@ -1191,9 +1211,10 @@ async def main():
     except Exception as e:
         logger.error(f"Failed to initialize vector database: {e}")
         raise
-    company = "RWE"
+    company = ""
+    if company == "": logger.warning("No company specified, please set the 'company' variable in main()")
     agent_info = AgentInfo(
-    client="default_client",
+    client=company,
     reranker_entity="RRF",
     reranker_fact="RRF",
     limit_vector_results=15,
@@ -1207,10 +1228,8 @@ async def main():
     query_qualitative_speedboat_list = kpi_qualitative_speedboat.all_queries_list()
 
     kpi_quantitative = QUANTITATIVE_KPIs_speedboat(client=company)
-    if company == "Walmart":
-        query_quantitative_speedboat_list = kpi_quantitative.all_queries_list(year_basis="FY", year_0 = 2025, year_1= 2024, year_2=2023)
-    elif company == "RWE":
-        query_quantitative_speedboat_list = kpi_quantitative.all_queries_list(year_basis="FY", year_0 = 2024, year_1= 2023, year_2=2022)
+    # PLEASE SET THE YEARS FOR QUANTITATIVE KPIs
+    query_quantitative_speedboat_list = kpi_quantitative.all_queries_list(year_basis="FY", year_0 = 2024, year_1= 2023, year_2=2022)
 
     query_complete = query_qualitative_speedboat_list + query_quantitative_speedboat_list
 
@@ -1218,7 +1237,7 @@ async def main():
     manager = create_credit_risk_report()
 
 
-
+    # ADD DESCRIPTION TO THE RUN
     await manager.run(client=company, agent_info=agent_info, query_list=query_complete, description="Full Report")
 
 
