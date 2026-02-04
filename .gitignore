@@ -1,7 +1,8 @@
 thesis_env/
 .env
-.DS_Store__pycache__/
+.DS_Store
+__pycache__/
 *.pyc
 *.pyo
 .DS_Store
-.pdf_documents/
+pdf_documents/
