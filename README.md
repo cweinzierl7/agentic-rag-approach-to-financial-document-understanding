@@ -258,7 +258,7 @@ agentic-rag-approach-to-financial-document-understanding/
 │   ├── graph_utils.py              # Graphiti utilities
 │   ├── providers.py                # LLM provider abstraction
 │   └── models.py                   # Data models
-├── ingestion/                      # Document processing
+├── ingestion/                      # Ingestion Process
 │   ├── ingest.py                   # Main ingestion pipeline
 │   ├── pdf_parse.py                # LlamaParse PDF extraction
 │   ├── data_prep.py                # Data preparation utilities
@@ -266,7 +266,7 @@ agentic-rag-approach-to-financial-document-understanding/
 │   ├── embedder.py                 # Embedding generation
 │   ├── graph_builder.py            # Graphiti knowledge graph
 │   ├── vector_db_builder.py        # Weaviate vector store
-│   ├── pdf_to_ingest/              # Input: PDF files
+│   ├── pdf_to_ingest/              # Input: PDF files to parse
 │   └── json_to_ingest/             # Parsed JSON documents
 ├── evaluation/                     # Evaluation notebooks
 │   ├── eval_ragas.ipynb            # RAGAS evaluation
@@ -285,37 +285,4 @@ agentic-rag-approach-to-financial-document-understanding/
 - [Multi-Agent Architecture](agent/multi_agent/00MULIT_AGENT_ARCHITECTURE.md) - Multi-agent system design
 - [Single-Agent Architecture](agent/single_agent/00SINGLE_AGENT_ARCHITECTURE.md) - Single-agent system design
 
-## Troubleshooting
 
-### Common Issues
-
-**Weaviate Connection**: Ensure your Weaviate URL and API key are correct
-```bash
-# Test with curl
-curl -H "Authorization: Bearer YOUR_API_KEY" https://your-cluster.weaviate.network/v1/meta
-```
-
-**Neo4j Connection**: Verify your Neo4j instance is running and credentials are correct
-```bash
-# Check if Neo4j is accessible
-cypher-shell -a $NEO4J_URI -u $NEO4J_USER -p $NEO4J_PASSWORD "RETURN 1"
-```
-
-**No Results from Agent**: Make sure you've run the ingestion pipeline first
-```bash
-python -m ingestion.ingest --verbose
-```
-
-**PDF Parsing Issues**: Verify your LlamaParse API key and that PDFs are in the correct folder
-```bash
-# Check pdf_to_ingest folder
-ls -la ingestion/pdf_to_ingest/
-```
-
-**LLM API Issues**: Check your API key and provider configuration in `.env`
-
----
-
-Built with ❤️ for Master's Thesis research on Agentic RAG approaches to Financial Document Understanding.
-
-Tech Stack: OpenAI Agents SDK | Graphiti | Weaviate | Neo4j | LlamaParse
