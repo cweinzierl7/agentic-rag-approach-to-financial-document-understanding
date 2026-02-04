@@ -78,7 +78,7 @@ docker run -d -p 8080:8080 semitechnologies/weaviate:latest
 
 ### 5. Configure environment variables
 
-Copy `env_to_fill.py` to `.env` and configure the values:
+Copy `env.example` to `.env` and configure the values:
 
 ```bash
 # PDF Parsing (LlamaParse)
@@ -204,8 +204,8 @@ This system combines the best of both worlds:
 - **Single Agent**: Monolithic approach with direct tool access
 - **Multi-Agent**: Specialized agents coordinated by an orchestrator:
   - **Router Agent**: Classifies queries and routes to appropriate retrievers
-  - **Quantitative Retriever**: Handles numerical KPIs and financial metrics
-  - **Qualitative Retriever**: Processes descriptive assessments and ratings
+  - **Quantitative Retriever**: Handles numerical KPIs 
+  - **Qualitative Retriever**: Handles qualitative KPIs 
   - **Derived-KPI Agent**: Calculates complex metrics from retrieved data
   - **Writer Agent**: Synthesizes final responses with citations
 
@@ -220,14 +220,7 @@ The agents have access to these search tools:
 | `graph_search_entities` | Search for entities in the knowledge graph |
 | `calculator` | Performs arithmetic calculations for derived KPIs |
 
-### Example Queries
 
-The system is optimized for credit risk KPI extraction:
-
-- **Quantitative KPIs**: "What is the EBITDA margin?" / "What are the revenue figures for 2023?"
-- **Qualitative Assessments**: "What is the management quality rating?" / "Describe the competitive position."
-- **Derived Metrics**: "Calculate the debt-to-equity ratio" / "What is the interest coverage ratio?"
-- **Comparative Analysis**: "How did revenue change year-over-year?" / "Compare profitability metrics across periods."
 
 ## Key Features
 
@@ -245,19 +238,23 @@ agentic-rag-approach-to-financial-document-understanding/
 ├── agent/                          # AI agent implementations
 │   ├── single_agent/               # Single-agent architecture
 │   │   ├── single_agent.py         # Main agent with OpenAI Agents SDK
-│   │   └── prompt_single_agent.py  # System prompts
+│   │   ├── prompt_single_agent.py  # System prompts
+│   │   └── outputs_single_agent/   # Single-agent output reports
 │   ├── multi_agent/                # Multi-agent architecture
 │   │   ├── orchestrator.py         # Python orchestrator
 │   │   ├── router_agent.py         # Query classification
 │   │   ├── retrieval_agent_quantitative.py
 │   │   ├── retrieval_agent_qualitative.py
 │   │   ├── derived_kpi_agent.py    # KPI calculations
-│   │   └── writer_agent.py         # Response synthesis
+│   │   ├── writer_agent.py         # Response synthesis
+│   │   └── outputs_multi_agent/    # Multi-agent output reports
 │   ├── tools.py                    # Search tool definitions
 │   ├── vector_db_utils.py          # Weaviate utilities
 │   ├── graph_utils.py              # Graphiti utilities
 │   ├── providers.py                # LLM provider abstraction
-│   └── models.py                   # Data models
+│   ├── models.py                   # Data models
+│   ├── query_quantitative_kpi.py   # Predefined quantitative KPI queries
+│   └── query_qualtitative_kpi.py   # Predefined qualitative KPI queries
 ├── ingestion/                      # Ingestion Process
 │   ├── ingest.py                   # Main ingestion pipeline
 │   ├── pdf_parse.py                # LlamaParse PDF extraction
@@ -268,19 +265,20 @@ agentic-rag-approach-to-financial-document-understanding/
 │   ├── vector_db_builder.py        # Weaviate vector store
 │   ├── pdf_to_ingest/              # Input: PDF files to parse
 │   └── json_to_ingest/             # Parsed JSON documents
-├── evaluation/                     # Evaluation notebooks
-│   ├── eval_ragas.ipynb            # RAGAS evaluation
-│   ├── eval_aga.ipynb              # Agent evaluation
-│   ├── citation_accuracy_evaluation.ipynb
-│   └── eval_visuals_tables.ipynb   # Visualization evaluation
+├── evaluation/                     # Evaluation notebooks for answer quality assessment
+│   ├── eval_ragas.ipynb            # RAGAS framework evaluation (faithfulness, relevancy)
+│   ├── eval_aga.ipynb              # Agent Goal Accuracy and combined derivation evaluation metrics
+│   ├── citation_accuracy_evaluation.ipynb  # Source citation accuracy
+│   └── eval_visuals_tables.ipynb   # Visual analysis and result tables
 ├── pdf_documents/                  # Original PDF storage
-├── env_to_fill.py                  # Environment template
+├── env.example                     # Environment template
 ├── requirements.txt                # Python dependencies
 └── README.md
 ```
 
 ## Documentation
 
+- [Agent Module](agent/00AGENT_MODULE.md) - Core agent utilities, tools, and models
 - [Ingestion Pipeline](ingestion/ingestion_pipeline.md) - Detailed ingestion documentation
 - [Multi-Agent Architecture](agent/multi_agent/00MULIT_AGENT_ARCHITECTURE.md) - Multi-agent system design
 - [Single-Agent Architecture](agent/single_agent/00SINGLE_AGENT_ARCHITECTURE.md) - Single-agent system design
