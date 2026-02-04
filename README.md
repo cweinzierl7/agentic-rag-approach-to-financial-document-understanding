@@ -1,0 +1,321 @@
+# Agentic RAG for Financial Document Understanding
+
+A agentic rag system for automated credit risk reporting that combines traditional RAG (vector search) with knowledge graph capabilities to analyze financial documents and extract Key Performance Indicators (KPIs).
+
+Built with:
+
+- **OpenAI Agents SDK** for the AI Agent Framework
+- **Graphiti** for the Knowledge Graph (entity/fact extraction)
+- **Weaviate** for the Vector Database (semantic + BM25 search)
+- **Neo4j** for the Knowledge Graph Engine
+- **LlamaParse** for PDF parsing
+
+## Overview
+
+This system implements two agent architectures for credit risk KPI retrieval:
+
+1. **Single-Agent Architecture**: A monolithic agent handling all retrieval tasks
+2. **Multi-Agent Architecture**: Specialized agents (Router, Quantitative Retriever, Qualitative Retriever, Derived-KPI Retriever, Writer) coordinated by a Python orchestrator
+
+Both architectures query a dual-indexed knowledge system:
+- **Weaviate**: Chunked financial documents with hybrid search (semantic + keyword)
+- **Graphiti/Neo4j**: Structured entity-relationship graph with temporal context
+
+## Prerequisites
+
+- Python 3.11 or higher
+- Neo4j database (for knowledge graph via Graphiti)
+- Weaviate instance (for vector database)
+- OpenAI API key (for embeddings and LLM)
+- LlamaParse API key (for PDF parsing)
+
+## Installation
+
+### 1. Set up a virtual environment
+
+```bash
+# Create and activate virtual environment
+python -m venv thesis_env       # python3 on Linux
+source thesis_env/bin/activate  # On Linux/macOS
+# or
+thesis_env\Scripts\activate     # On Windows
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Set up Neo4j
+
+You have a couple options for setting up Neo4j:
+
+#### Option A: Using Neo4j Aura (Cloud)
+1. Create a free account at [Neo4j Aura](https://neo4j.com/cloud/aura/)
+2. Create a new database instance
+3. Note your connection URI, username, and password
+
+#### Option B: Using Neo4j Desktop (Local)
+1. Download and install [Neo4j Desktop](https://neo4j.com/download/)
+2. Create a new project and add a local DBMS
+3. Start the DBMS and set a password
+4. Note the connection details (URI, username, password)
+
+### 4. Set up Weaviate
+
+You can use Weaviate Cloud or run it locally:
+
+#### Option A: Weaviate Cloud (Recommended)
+1. Create a free account at [Weaviate Cloud](https://console.weaviate.cloud/)
+2. Create a new cluster
+3. Note your cluster URL and API key
+
+#### Option B: Local Docker
+```bash
+docker run -d -p 8080:8080 semitechnologies/weaviate:latest
+```
+
+### 5. Configure environment variables
+
+Copy `env_to_fill.py` to `.env` and configure the values:
+
+```bash
+# PDF Parsing (LlamaParse)
+PDF_PARSE_API_KEY=your_llamaparse_api_key
+
+# Weaviate Vector Database
+WEAVIATE_URL=https://your-cluster.weaviate.network
+WEAVIATE_API=your_weaviate_api_key
+
+# Neo4j Knowledge Graph
+NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=your_password
+
+# LLM Configuration
+LLM_PROVIDER=openai
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_API_KEY=sk-your-api-key
+LLM_CHOICE=your_llm_choice
+
+# Embedding Configuration
+EMBEDDING_PROVIDER=openai
+EMBEDDING_BASE_URL=https://api.openai.com/v1
+EMBEDDING_API_KEY=sk-your-api-key
+EMBEDDING_MODEL=your_embedding_choice
+```
+
+## Quick Start
+
+### 1. Prepare Your PDF Documents
+
+Add your financial PDF documents (annual reports, financial statements, etc.) to the `ingestion/pdf_to_ingest/` folder:
+
+```bash
+# Add PDF files to parse
+cp your_annual_report.pdf ingestion/pdf_to_ingest/
+```
+
+### 2. Parse PDFs with LlamaParse
+
+First, convert PDFs to JSON format:
+
+```bash
+python -m ingestion.pdf_parse
+```
+
+This uses LlamaParse to extract structured content from PDFs and saves JSON files to `ingestion/json_to_ingest/`.
+
+### 3. Run Document Ingestion
+
+Ingest the parsed documents into the vector database and knowledge graph:
+
+```bash
+# Basic ingestion
+python -m ingestion.ingest --client "YourCompany" 
+
+# Clean existing data and re-ingest
+python -m ingestion.ingest --clean --client "YourCompany" 
+
+# Ingest only to vector database (skip knowledge graph)
+python -m ingestion.ingest --vector_db_only --client "YourCompany" 
+
+# Custom chunking settings
+python -m ingestion.ingest --chunk-size 600 --chunk-overlap 50 --client "YourCompany" 
+
+# Full example with all options
+python -m ingestion.ingest -d ingestion/json_to_ingest -c --chunk-size 400 -v --client "YourCompany" 
+```
+
+#### Ingestion CLI Arguments
+
+| Argument | Short | Default | Description |
+|----------|-------|---------|-------------|
+| `--documents` | `-d` | `ingestion/json_to_ingest` | Documents folder path |
+| `--clean` | `-c` | `false` | Clean existing data before ingestion |
+| `--chunk-size` | | `400` | Chunk size for splitting documents |
+| `--chunk-overlap` | | `0` | Chunk overlap size |
+| `--client` | | `default_client` | Credit risk client name |
+| `--verbose` | `-v` | `false` | Enable verbose logging |
+| `--vector_db_only` | `-vdb` | `false` | Only ingest to vector DB, skip knowledge graph |
+
+The ingestion process will:
+- Parse and chunk your documents using LangChain's recursive text splitter
+- Generate embeddings using OpenAI's text-embedding-3-small (1536 dimensions)
+- Store chunks in Weaviate with hybrid search capabilities
+- Extract entities and relationships for the Graphiti knowledge graph
+
+**Note**: Knowledge graph extraction is computationally intensive and may take significant time for large document sets.
+
+### 4. Run the Single Agent
+
+```bash
+python -m agent.single_agent
+```
+
+**Note**: Before running, configure the client name and retrieval parameters in `agent/single_agent/single_agent.py`.
+
+### 5. Run the Multi-Agent System
+
+```bash
+python -m agent.multi_agent.orchestrator
+```
+
+**Note**: Before running, configure the client name and retrieval parameters in `agent/multi_agent/orchestrator.py`.
+
+## How It Works
+
+### The Power of Hybrid RAG + Knowledge Graph
+
+This system combines the best of both worlds:
+
+**Weaviate Vector Database**:
+- Hybrid search combining semantic similarity (dense vectors) + BM25 keyword matching (sparse vectors)
+- Fast retrieval of contextually relevant document chunks
+- Sentence window retrieval for expanded context
+
+**Knowledge Graph (Neo4j + Graphiti)**:
+- Temporal entity-relationship extraction from financial documents
+- Graph traversal for discovering connections between KPIs, companies, and events
+- Structured fact storage with source attribution
+
+**Intelligent Agent System**:
+- **Single Agent**: Monolithic approach with direct tool access
+- **Multi-Agent**: Specialized agents coordinated by an orchestrator:
+  - **Router Agent**: Classifies queries and routes to appropriate retrievers
+  - **Quantitative Retriever**: Handles numerical KPIs and financial metrics
+  - **Qualitative Retriever**: Processes descriptive assessments and ratings
+  - **Derived-KPI Agent**: Calculates complex metrics from retrieved data
+  - **Writer Agent**: Synthesizes final responses with citations
+
+### Available Tools
+
+The agents have access to these search tools:
+
+| Tool | Description |
+|------|-------------|
+| `vector_hybrid_search` | Hybrid search (semantic + BM25) in Weaviate |
+| `graph_search_facts` | Search for facts/relationships in Graphiti |
+| `graph_search_entities` | Search for entities in the knowledge graph |
+| `calculator` | Performs arithmetic calculations for derived KPIs |
+
+### Example Queries
+
+The system is optimized for credit risk KPI extraction:
+
+- **Quantitative KPIs**: "What is the EBITDA margin?" / "What are the revenue figures for 2023?"
+- **Qualitative Assessments**: "What is the management quality rating?" / "Describe the competitive position."
+- **Derived Metrics**: "Calculate the debt-to-equity ratio" / "What is the interest coverage ratio?"
+- **Comparative Analysis**: "How did revenue change year-over-year?" / "Compare profitability metrics across periods."
+
+## Key Features
+
+- **Dual Architecture**: Single-agent and multi-agent approaches for comparison
+- **Hybrid Search**: Combines semantic vector search with BM25 keyword matching
+- **Knowledge Graph Integration**: Graphiti for temporal entity-relationship extraction
+- **PDF Processing**: LlamaParse for accurate financial document parsing
+- **Credit Risk Focus**: Optimized for KPI extraction and financial analysis
+- **Evaluation Framework**: RAGAS and custom metrics for answer quality assessment
+
+## Project Structure
+
+```
+agentic-rag-approach-to-financial-document-understanding/
+├── agent/                          # AI agent implementations
+│   ├── single_agent/               # Single-agent architecture
+│   │   ├── single_agent.py         # Main agent with OpenAI Agents SDK
+│   │   └── prompt_single_agent.py  # System prompts
+│   ├── multi_agent/                # Multi-agent architecture
+│   │   ├── orchestrator.py         # Python orchestrator
+│   │   ├── router_agent.py         # Query classification
+│   │   ├── retrieval_agent_quantitative.py
+│   │   ├── retrieval_agent_qualitative.py
+│   │   ├── derived_kpi_agent.py    # KPI calculations
+│   │   └── writer_agent.py         # Response synthesis
+│   ├── tools.py                    # Search tool definitions
+│   ├── vector_db_utils.py          # Weaviate utilities
+│   ├── graph_utils.py              # Graphiti utilities
+│   ├── providers.py                # LLM provider abstraction
+│   └── models.py                   # Data models
+├── ingestion/                      # Document processing
+│   ├── ingest.py                   # Main ingestion pipeline
+│   ├── pdf_parse.py                # LlamaParse PDF extraction
+│   ├── data_prep.py                # Data preparation utilities
+│   ├── chunker.py                  # Text chunking with LangChain
+│   ├── embedder.py                 # Embedding generation
+│   ├── graph_builder.py            # Graphiti knowledge graph
+│   ├── vector_db_builder.py        # Weaviate vector store
+│   ├── pdf_to_ingest/              # Input: PDF files
+│   └── json_to_ingest/             # Parsed JSON documents
+├── evaluation/                     # Evaluation notebooks
+│   ├── eval_ragas.ipynb            # RAGAS evaluation
+│   ├── eval_aga.ipynb              # Agent evaluation
+│   ├── citation_accuracy_evaluation.ipynb
+│   └── eval_visuals_tables.ipynb   # Visualization evaluation
+├── pdf_documents/                  # Original PDF storage
+├── env_to_fill.py                  # Environment template
+├── requirements.txt                # Python dependencies
+└── README.md
+```
+
+## Documentation
+
+- [Ingestion Pipeline](ingestion/ingestion_pipeline.md) - Detailed ingestion documentation
+- [Multi-Agent Architecture](agent/multi_agent/00MULIT_AGENT_ARCHITECTURE.md) - Multi-agent system design
+- [Single-Agent Architecture](agent/single_agent/00SINGLE_AGENT_ARCHITECTURE.md) - Single-agent system design
+
+## Troubleshooting
+
+### Common Issues
+
+**Weaviate Connection**: Ensure your Weaviate URL and API key are correct
+```bash
+# Test with curl
+curl -H "Authorization: Bearer YOUR_API_KEY" https://your-cluster.weaviate.network/v1/meta
+```
+
+**Neo4j Connection**: Verify your Neo4j instance is running and credentials are correct
+```bash
+# Check if Neo4j is accessible
+cypher-shell -a $NEO4J_URI -u $NEO4J_USER -p $NEO4J_PASSWORD "RETURN 1"
+```
+
+**No Results from Agent**: Make sure you've run the ingestion pipeline first
+```bash
+python -m ingestion.ingest --verbose
+```
+
+**PDF Parsing Issues**: Verify your LlamaParse API key and that PDFs are in the correct folder
+```bash
+# Check pdf_to_ingest folder
+ls -la ingestion/pdf_to_ingest/
+```
+
+**LLM API Issues**: Check your API key and provider configuration in `.env`
+
+---
+
+Built with ❤️ for Master's Thesis research on Agentic RAG approaches to Financial Document Understanding.
+
+Tech Stack: OpenAI Agents SDK | Graphiti | Weaviate | Neo4j | LlamaParse
