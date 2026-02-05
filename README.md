@@ -1,6 +1,6 @@
 # Agentic RAG for Financial Document Understanding
 
-A agentic rag system for automated credit risk reporting that combines traditional RAG (vector search) with knowledge graph capabilities to analyze financial documents and extract Key Performance Indicators (KPIs).
+An agentic rag approach for automated credit risk reporting that combines traditional RAG (vector search) with knowledge graph capabilities to analyze financial documents and extract Key Performance Indicators (KPIs).
 
 Built with:
 
@@ -35,7 +35,7 @@ Both architectures query a dual-indexed knowledge system:
 
 ```bash
 # Create and activate virtual environment
-python -m venv venv       # python3 on Linux
+python -m venv        # python3 on Linux
 source venv/bin/activate  # On Linux/macOS
 # or
 venv\Scripts\activate     # On Windows
@@ -66,15 +66,20 @@ You have a couple options for setting up Neo4j:
 
 You can use Weaviate Cloud or run it locally:
 
-#### Option A: Weaviate Cloud 
-1. Create an account at [Weaviate Cloud](https://console.weaviate.cloud/)
-2. Create a new cluster
-3. Note your cluster URL and API key
 
-#### Option B: Local Docker
+#### Option A: Local Docker
 ```bash
 docker run -d -p 8080:8080 semitechnologies/weaviate:latest
 ```
+
+#### Option B: Weaviate Cloud 
+1. Create an account at [Weaviate Cloud](https://console.weaviate.cloud/)
+2. Create a new cluster
+3. Note your cluster URL and API key
+- If using **Weaviate Cloud** instead of a local instance, update `ingestion/ingest.py`:
+  - Change `create_vector_db(basis="local")` to `create_vector_db(basis="cloud")`
+  - The default is set to `"local"`
+
 
 ### 5. Configure environment variables
 
@@ -243,8 +248,8 @@ agentic-rag-approach-to-financial-document-understanding/
 │   ├── multi_agent/                # Multi-agent architecture
 │   │   ├── orchestrator.py         # Python orchestrator
 │   │   ├── router_agent.py         # Query classification
-│   │   ├── retrieval_agent_quantitative.py
-│   │   ├── retrieval_agent_qualitative.py
+│   │   ├── retrieval_agent_quantitative.py   # Quantitative retrieval agent
+│   │   ├── retrieval_agent_qualitative.py    # Qualtiative retrieval agent
 │   │   ├── derived_kpi_agent.py    # KPI calculations
 │   │   ├── writer_agent.py         # Response synthesis
 │   │   └── outputs_multi_agent/    # Multi-agent output reports
@@ -282,5 +287,22 @@ agentic-rag-approach-to-financial-document-understanding/
 - [Ingestion Pipeline](ingestion/ingestion_pipeline.md) - Detailed ingestion documentation
 - [Multi-Agent Architecture](agent/multi_agent/00MULIT_AGENT_ARCHITECTURE.md) - Multi-agent system design
 - [Single-Agent Architecture](agent/single_agent/00SINGLE_AGENT_ARCHITECTURE.md) - Single-agent system design
+
+##  Disclaimer
+
+This system provides a **general-purpose framework** for financial document analysis. The following aspects require customization and refinement for production use:
+
+### System Instructions & Prompts
+- Agent prompts and system instructions (`agent/*/prompt_*`) are tailored for generic financial documents
+- **You can adapt these prompts** to your specific company domain, industry standards, and reporting conventions
+- Different industries (banking, manufacturing, retail, etc.) have distinct KPI definitions and risk factors
+
+### KPI Definitions & Calculation Formulas
+- Predefined KPI queries (`agent/query_quantitative_kpi.py`, `agent/query_qualitative_kpi.py`) are illustrative examples
+- **Financial metrics and calculation formulas vary** by company, industry, and accounting standards (IFRS vs. GAAP, etc.)
+- The calculation tools in both `agent/single_agent/` and `agent/multi_agent/derived_kpi_agent.py` implement generic financial formulas and **must be customized** with company-specific calculation logic, as well as the system instructions for single agent and derived_kpi_agent
+- Manual review and validation of extracted KPIs is **strongly recommended** before using results in decision-making
+
+---
 
 
