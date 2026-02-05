@@ -275,7 +275,6 @@ agentic-rag-approach-to-financial-document-understanding/
 │   ├── eval_aga.ipynb              # Agent Goal Accuracy and combined derivation evaluation metrics
 │   ├── citation_accuracy_evaluation.ipynb  # Source citation accuracy
 │   └── eval_visuals_tables.ipynb   # Visual analysis and result tables
-├── pdf_documents/                  # Original PDF storage
 ├── env.example                     # Environment template
 ├── requirements.txt                # Python dependencies
 └── README.md
